@@ -1,14 +1,23 @@
 package main
 
 import (
-    "net/http"
-	"example.com/umamusume/pkg/services"
-    "github.com/gin-gonic/gin"
+	"net/http"
+
+	"example.com/go-polls/internal"
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
-    router := gin.Default()
-    router.GET("/albums", services.getAlbums)
+	router := gin.Default()
 
-    router.Run("localhost:8080")
+	router.GET("/", func(ctx *gin.Context) {
+		redisURL, err := internal.GetRedisURL()
+		if err != nil {
+			ctx.String(http.StatusInternalServerError, "Error: %s", err.Error())
+			return
+		}
+		ctx.String(http.StatusOK, redisURL)
+	})
+
+	router.Run()
 }

@@ -1,14 +1,10 @@
 package internal
 
-import (
-	"github.com/redis/go-redis/v9"
-)
+func get_client() (string, error) {
+	url, err := get_redis_url()
+	if err != nil {
+		return "", err
+	}
 
-func healthcheck() {
-	client := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "", // No password set
-		DB:       0,  // Use default DB
-		Protocol: 2,  // Connection protocol
-	})
+	return url, nil
 }

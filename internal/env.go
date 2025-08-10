@@ -8,7 +8,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func get_redis_url() (string, error) {
+func GetRedisURL() (string, error) {
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("could not get redis url")
