@@ -10,10 +10,7 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-var (
-	ctx = context.Background()
-	rdb *redis.Client
-)
+var rdb *redis.Client
 
 func init() {
 	url, err := internal.GetRedisURL()
@@ -27,20 +24,40 @@ func init() {
 	}
 
 	rdb = redis.NewClient(opts)
-
-	if err := rdb.Ping(ctx).Err(); err != nil {
+	if err := rdb.Ping(context.Background()).Err(); err != nil {
 		log.Fatal("Failed to connect to Redis:", err)
 	}
 }
 
-func GetClient() *redis.Client {
-	return rdb
+func SetKeyValue(ctx context.Context, key string, value string, seconds int) error {
+	_, err := rdb.SetNX(ctx, key, value, time.Duration(seconds)*time.Second).Result()
+	if err != nil {
+		log.Print("unable to set key:", err)
+		return err
+	}
+	return nil
 }
 
-func SetKeyValue(key string, value string, seconds time.Duration) bool {
-	set, err := rdb.SetNX(ctx, key, value, seconds*time.Second).Result()
-	if err != nil {
-		log.Print("Unable to set key", err)
+func SetHash(ctx context.Context, key string, params map[string]string, seconds int) error {
+	if err := rdb.HSet(ctx, key, params).Err(); err != nil {
+		log.Print("unable to set hash:", err)
+		return err
 	}
-	return set
+	
+	if seconds > 0 {
+		if err := rdb.Expire(ctx, key, time.Duration(seconds)*time.Second).Err(); err != nil {
+			log.Print("unable to set expiration:", err)
+			return err
+		}
+	}
+	return nil
+}
+
+func GetHash(ctx context.Context, key string) (map[string]string, error) {
+	hash, err := rdb.HGetAll(ctx, key).Result()
+	if err != nil {
+		log.Print("unable to get hash:", err)
+		return nil, err
+	}
+	return hash, nil
 }
