@@ -1,0 +1,24 @@
+@baseUrl = http://localhost:8080
+
+### Health check
+GET {{baseUrl}}/health
+Accept: application/json
+
+### Create user
+POST {{baseUrl}}/users
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "Ada Lovelace"
+}
+
+### Get user by ID
+@userId = REPLACE_WITH_USER_ID
+GET {{baseUrl}}/users/{{userId}}
+Accept: application/json
+
+### List users
+GET {{baseUrl}}/users/
+Accept: application/json
+
