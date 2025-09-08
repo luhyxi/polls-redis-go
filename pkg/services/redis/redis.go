@@ -61,3 +61,13 @@ func GetHash(ctx context.Context, key string) (map[string]string, error) {
 	}
 	return hash, nil
 }
+
+func GetAllKeys(ctx context.Context, pattrn string) ([]string, error) {
+	hash, err := rdb.Keys(ctx, pattrn).Result()
+		if err != nil {
+		log.Print("unable to get keys:", err)
+		return nil, err
+	}
+	
+	return hash, nil
+}

@@ -4,8 +4,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
+	"example.com/go-polls/pkg/models"
 	poll "example.com/go-polls/pkg/services/poll"
+	"github.com/gin-gonic/gin"
 )
 
 func Run() {
@@ -21,16 +22,14 @@ func Run() {
 
 	// User endpoints
 	router.POST("/users", func(ctx *gin.Context) {
-		var req struct {
-			Name string `json:"name" binding:"required"`
-		}
+		var req models.CreateUserRequest
 
 		if err := ctx.ShouldBindJSON(&req); err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
 			return
 		}
 
-		user, err := poll.CreateUser(req.Name)
+		user, err := poll.CreateUser(req)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -49,6 +48,19 @@ func Run() {
 		user, err := poll.GetUser("user:" + userID)
 		if err != nil {
 			ctx.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, gin.H{
+			"user": user,
+		})
+	})
+
+	// Get all users
+	router.GET("/users/", func(ctx *gin.Context) {
+		user, err := poll.GetAllUsers()
+		if err != nil {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "users not found"})
 			return
 		}
 
