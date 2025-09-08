@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"example.com/go-polls/pkg/models"
-	poll "example.com/go-polls/pkg/services/poll"
+	"example.com/go-polls/pkg/services/user"
 	"github.com/gin-gonic/gin"
 )
 
@@ -29,7 +29,7 @@ func Run() {
 			return
 		}
 
-		user, err := poll.CreateUser(req)
+		user, err := user.CreateUser(req)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -45,7 +45,7 @@ func Run() {
 	router.GET("/users/:id", func(ctx *gin.Context) {
 		userID := ctx.Param("id")
 		
-		user, err := poll.GetUser("user:" + userID)
+		user, err := user.GetUser("user:" + userID)
 		if err != nil {
 			ctx.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
 			return
@@ -58,7 +58,7 @@ func Run() {
 
 	// Get all users
 	router.GET("/users/", func(ctx *gin.Context) {
-		user, err := poll.GetAllUsers()
+		user, err := user.GetAllUsers()
 		if err != nil {
 			ctx.JSON(http.StatusNotFound, gin.H{"error": "users not found"})
 			return
