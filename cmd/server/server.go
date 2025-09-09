@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"example.com/go-polls/internal"
 	"example.com/go-polls/pkg/models"
 	"example.com/go-polls/pkg/services/user"
 	"github.com/gin-gonic/gin"
@@ -53,6 +54,38 @@ func Run() {
 
 		ctx.JSON(http.StatusOK, gin.H{
 			"user": user,
+		})
+	})
+
+	// Login endpoint
+	router.POST("/login", func(ctx *gin.Context) {
+		var loginReq struct {
+			Username string `json:"username" binding:"required"`
+			Password string `json:"password" binding:"required"`
+		}
+
+		if err := ctx.ShouldBindJSON(&loginReq); err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
+			return
+		}
+
+		// Simple validation - It accepts any password
+		_, err := user.GetUser("user:" + loginReq.Username)
+		if err != nil {
+			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
+			return
+		}
+
+		// Generate JWT token
+		token, err := internal.GenerateJwtToken(loginReq.Username)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate token"})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, gin.H{
+			"message": "login successful",
+			"token":   token,
 		})
 	})
 

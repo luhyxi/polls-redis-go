@@ -17,3 +17,14 @@ func GetRedisURL() (string, error) {
 
 	return os.Getenv("REDIS_URL"), nil
 }
+
+func GetJwtToken() (string, error) {
+	err := godotenv.Load()
+
+	if err != nil {
+		log.Fatal("could not get jwt token")
+		return "", errors.New("could not get jwt token")
+	}
+
+	return os.Getenv("JWT_SECRET"), nil
+}
