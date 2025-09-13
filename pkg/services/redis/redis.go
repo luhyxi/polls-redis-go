@@ -43,7 +43,7 @@ func SetHash(ctx context.Context, key string, params map[string]string, seconds 
 		log.Print("unable to set hash:", err)
 		return err
 	}
-	
+
 	if seconds > 0 {
 		if err := rdb.Expire(ctx, key, time.Duration(seconds)*time.Second).Err(); err != nil {
 			log.Print("unable to set expiration:", err)
@@ -64,10 +64,10 @@ func GetHash(ctx context.Context, key string) (map[string]string, error) {
 
 func GetAllKeys(ctx context.Context, pattrn string) ([]string, error) {
 	hash, err := rdb.Keys(ctx, pattrn).Result()
-		if err != nil {
+	if err != nil {
 		log.Print("unable to get keys:", err)
 		return nil, err
 	}
-	
+
 	return hash, nil
 }

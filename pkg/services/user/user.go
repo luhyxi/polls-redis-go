@@ -1,68 +1,61 @@
-//Package user contains functions for the user type
+// Package user contains functions for the user type
 package user
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"time"
 
+	mapper "example.com/go-polls/pkg/helpers"
 	models "example.com/go-polls/pkg/models"
 	redis "example.com/go-polls/pkg/services/redis"
-	"github.com/google/uuid"
 )
 
-func CreateUser(request models.CreateUserRequest) (string , error) {
-	userID := uuid.NewString()
+func CreateUser(request models.CreateUserRequest) (string, error) {
+	key := "user:" + request.Name
 
-    key := "user:" + userID
-	now := time.Now()
+	newUser := models.NewUser(request.Name)
 
-    params := map[string]string{
-        "id":        userID,
-        "name":      request.Name,
-        "createdAt": now.Format("01-02-2006 15:04:05"),
-    }
+	params := mapper.UserToMap(newUser)
 
 	err := redis.SetHash(context.Background(), key, params, 60*60)
-    if err != nil {
+	if err != nil {
 		return "", fmt.Errorf("failed to save user in Redis: %w", err)
-    }
-	
-    jsonBytes, err := json.Marshal(params)
-    if err != nil {
-        return "", fmt.Errorf("failed to marshal user data: %w", err)
-    }
+	}
 
-    return string(jsonBytes), nil
+	jsonBytes, err := json.Marshal(params)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal user data: %w", err)
+	}
+
+	return string(jsonBytes), nil
 }
 
-
-func GetUser(id string)(string, error)  {
+func GetUser(id string) (string, error) {
 	val, err := redis.GetHash(context.Background(), id)
 	if err != nil {
 		return "", fmt.Errorf("failed to get user in Redis: %w", err)
 	}
 
-    jsonBytes, err := json.Marshal(val)
-    if err != nil {
-        return "", fmt.Errorf("failed to marshal user data: %w", err)
-    }
+	jsonBytes, err := json.Marshal(val)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal user data: %w", err)
+	}
 
-    return string(jsonBytes), nil
+	return string(jsonBytes), nil
 }
 
-func GetAllUsers()(string,error) {
+func GetAllUsers() (string, error) {
 	val, err := redis.GetAllKeys(context.Background(), "user:*")
 
 	if err != nil {
 		return "", fmt.Errorf("failed to get user in Redis: %w", err)
 	}
 
-    jsonBytes, err := json.Marshal(val)
-    if err != nil {
-        return "", fmt.Errorf("failed to marshal user data: %w", err)
-    }
+	jsonBytes, err := json.Marshal(val)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal user data: %w", err)
+	}
 
-    return string(jsonBytes), nil
+	return string(jsonBytes), nil
 }

@@ -45,7 +45,7 @@ func Run() {
 	// Get user by ID
 	router.GET("/users/:id", func(ctx *gin.Context) {
 		userID := ctx.Param("id")
-		
+
 		user, err := user.GetUser("user:" + userID)
 		if err != nil {
 			ctx.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
